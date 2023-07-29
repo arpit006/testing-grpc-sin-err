@@ -26,7 +26,7 @@ func main() {
 	//grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
 
 	startTime := time.Now()
-	conn, err := grpc.Dial("10.225.96.9:80", grpc.WithInsecure())
+	conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
 	}
