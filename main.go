@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/grpclog"
 	"log"
 	"os"
 	"source.golabs.io/scp/goto-profile-protos/gen/models"
@@ -21,6 +22,10 @@ func main() {
 
 	// Set GRPC_GO_LOG_SEVERITY_LEVEL environment variable to 'debug'
 	_ = os.Setenv("GRPC_GO_LOG_SEVERITY_LEVEL", "debug")
+
+	// Initialize the custom logger with debug verbosity
+	grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
+
 	conn, err := grpc.Dial("10.225.96.9:80", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
