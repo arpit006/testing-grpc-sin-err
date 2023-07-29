@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"os"
+	"source.golabs.io/scp/goto-profile-protos/gen/models"
 	"source.golabs.io/scp/goto-profile-protos/gen/services"
 	"time"
 )
@@ -15,7 +16,7 @@ func main() {
 	_ = os.Setenv("GRPC_TRACE", "all")
 	conn, err := grpc.Dial("10.225.96.9:80", grpc.WithInsecure())
 	if err != nil {
-		fmt.Println("[error] could not obtain gRPC connection")
+		fmt.Printf("[error] could not obtain gRPC connection. err: [%s]\n", err)
 		return
 	}
 	defer conn.Close()
@@ -23,13 +24,13 @@ func main() {
 	ctx := context.Background()
 	client := services.NewProfilePingServiceClient(conn)
 	if err != nil {
-		fmt.Println("[error] could not get profileService client")
+		fmt.Printf("[error] could not get profileService client. err: [%s]\n", err)
 		return
 	}
 	startTime := time.Now()
-	resp, err := client.Ping(ctx, nil)
+	resp, err := client.Ping(ctx, &models.NoParam{})
 	if err != nil {
-		fmt.Println("[error] from ping singapore PS")
+		fmt.Printf("[error] from ping singapore PS. err: [%s]\n", err)
 		return
 	}
 	fmt.Printf("[response] timeTaken: [%v milliSeconds] from Singapore ProfileService: [%+v]", time.Since(startTime).Milliseconds(), resp)
