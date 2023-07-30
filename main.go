@@ -28,24 +28,27 @@ func main() {
 
 	startTime := time.Now()
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(2)
-	go initConnectionAndCall("FIRST", waitGroup)
-	go initConnectionAndCall("SECOND", waitGroup)
-	go initConnectionAndCall("THIRD", waitGroup)
-	go initConnectionAndCall("FOURTH", waitGroup)
-	go initConnectionAndCall("FIFTH", waitGroup)
+	waitGroup.Add(5)
+
+	conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
+	}
+	defer conn.Close()
+
+	go initConnectionAndCall(conn, "FIRST", waitGroup)
+	go initConnectionAndCall(conn, "SECOND", waitGroup)
+	go initConnectionAndCall(conn,"THIRD", waitGroup)
+	go initConnectionAndCall(conn, "FOURTH", waitGroup)
+	go initConnectionAndCall(conn, "FIFTH", waitGroup)
 
 	waitGroup.Wait()
 
 	log.Fatalf("[successful] All batch calls completed succesffully from Profile service in: [%v milliSeconds]", time.Since(startTime).Milliseconds())
 }
 
-func initConnectionAndCall(leader string, waitGroup *sync.WaitGroup) {
-	conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
-	}
-	defer conn.Close()
+func initConnectionAndCall(conn *grpc.ClientConn, leader string, waitGroup *sync.WaitGroup) {
+
 
 	pingInLoop(conn, leader)
 	waitGroup.Done()
