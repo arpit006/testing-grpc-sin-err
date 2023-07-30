@@ -8,6 +8,7 @@ import (
 	"os"
 	"source.golabs.io/scp/goto-profile-protos/gen/models"
 	"source.golabs.io/scp/goto-profile-protos/gen/services"
+	"sync"
 	"time"
 )
 
@@ -26,13 +27,17 @@ func main() {
 	//grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
 
 	startTime := time.Now()
-	go initConnectionAndCall("FIRST")
-	go initConnectionAndCall("SECOND")
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(2)
+	go initConnectionAndCall("FIRST", waitGroup)
+	go initConnectionAndCall("SECOND", waitGroup)
+
+	waitGroup.Wait()
 
 	log.Fatalf("[successful] All batch calls completed succesffully from Profile service in: [%v milliSeconds]", time.Since(startTime).Milliseconds())
 }
 
-func initConnectionAndCall(leader string) {
+func initConnectionAndCall(leader string, waitGroup *sync.WaitGroup) {
 	conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
@@ -40,6 +45,7 @@ func initConnectionAndCall(leader string) {
 	defer conn.Close()
 
 	pingInLoop(conn, leader)
+	waitGroup.Done()
 }
 
 func pingInLoop(conn *grpc.ClientConn, leader string) {
