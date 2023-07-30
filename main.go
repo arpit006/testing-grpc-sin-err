@@ -26,25 +26,31 @@ func main() {
 	//grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
 
 	startTime := time.Now()
+	go initConnectionAndCall("FIRST")
+	go initConnectionAndCall("SECOND")
+
+	log.Fatalf("[successful] All batch calls completed succesffully from Profile service in: [%v milliSeconds]", time.Since(startTime).Milliseconds())
+}
+
+func initConnectionAndCall(leader string) {
 	conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
 	}
 	defer conn.Close()
 
-	pingInLoop(conn)
-	log.Fatalf("[successful] All batch calls completed succesffully from Profile service in: [%v milliSeconds]", time.Since(startTime).Milliseconds())
+	pingInLoop(conn, leader)
 }
 
-func pingInLoop(conn *grpc.ClientConn) {
-	for i := 1; i <= 20; i++ {
+func pingInLoop(conn *grpc.ClientConn, leader string) {
+	for i := 1; i <= 30; i++ {
 		ctx := context.Background()
 		client := services.NewProfilePingServiceClient(conn)
 		startTime := time.Now()
 		resp, err := client.Ping(ctx, &models.NoParam{})
 		if err != nil {
-			log.Printf("[error] from ping singapore PS. err: [%s]", err)
+			log.Printf("[%s] [error] from ping singapore PS. err: [%s]", leader, err)
 		}
-		log.Printf("[response] timeTaken: [%v milliSeconds] from Singapore ProfileService: [%+v]", time.Since(startTime).Milliseconds(), resp)
+		log.Printf("[%s] [response] timeTaken: [%v milliSeconds] from Singapore ProfileService: [%+v]", leader, time.Since(startTime).Milliseconds(), resp)
 	}
 }
