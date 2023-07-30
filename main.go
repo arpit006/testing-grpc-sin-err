@@ -31,6 +31,9 @@ func main() {
 	waitGroup.Add(2)
 	go initConnectionAndCall("FIRST", waitGroup)
 	go initConnectionAndCall("SECOND", waitGroup)
+	go initConnectionAndCall("THIRD", waitGroup)
+	go initConnectionAndCall("FOURTH", waitGroup)
+	go initConnectionAndCall("FIFTH", waitGroup)
 
 	waitGroup.Wait()
 
