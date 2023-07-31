@@ -30,21 +30,30 @@ func main() {
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(5)
 
-	conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
-	}
-	defer conn.Close()
+	//conn, err := grpc.Dial("10.225.139.211:80", grpc.WithInsecure())
+	//if err != nil {
+	//	log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
+	//}
+	//defer conn.Close()
 
-	go initConnectionAndCall(conn, "FIRST", waitGroup)
-	go initConnectionAndCall(conn, "SECOND", waitGroup)
-	go initConnectionAndCall(conn,"THIRD", waitGroup)
-	go initConnectionAndCall(conn, "FOURTH", waitGroup)
-	go initConnectionAndCall(conn, "FIFTH", waitGroup)
+	go initConnectionAndCall(getConn(), "FIRST", waitGroup)
+	go initConnectionAndCall(getConn(), "SECOND", waitGroup)
+	go initConnectionAndCall(getConn(),"THIRD", waitGroup)
+	go initConnectionAndCall(getConn(), "FOURTH", waitGroup)
+	go initConnectionAndCall(getConn(), "FIFTH", waitGroup)
 
 	waitGroup.Wait()
 
 	log.Fatalf("[successful] All batch calls completed succesffully from Profile service in: [%v milliSeconds]", time.Since(startTime).Milliseconds())
+}
+
+func getConn() *grpc.ClientConn {
+	conn, err := grpc.Dial("10.225.96.9:80", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("[error] could not obtain gRPC connection. err: [%s]", err)
+	}
+	//defer conn.Close()
+	return conn
 }
 
 func initConnectionAndCall(conn *grpc.ClientConn, leader string, waitGroup *sync.WaitGroup) {
